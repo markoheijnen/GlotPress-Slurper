@@ -5,6 +5,7 @@ class Plugin_Slurper extends GP_Plugin {
 
 	private $path;
 
+
 	public function __construct() {
 		parent::__construct();
 
@@ -38,8 +39,8 @@ class Plugin_Slurper extends GP_Plugin {
 				if ( substr( $file, 0, 1 ) == '.' )
 					continue;
 
-				if ( is_dir( $plugin_root.'/'.$file ) ) {
-					$plugins_subdir = @ opendir( $plugin_root.'/'.$file );
+				if ( is_dir( $plugin_root . '/' . $file ) ) {
+					$plugins_subdir = @ opendir( $plugin_root . '/' . $file );
 
 					if ( $plugins_subdir ) {
 						while ( ( $subfile = readdir( $plugins_subdir ) ) !== false ) {
