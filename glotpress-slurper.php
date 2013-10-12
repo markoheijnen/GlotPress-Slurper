@@ -4,6 +4,7 @@ class Plugin_Slurper extends GP_Plugin {
 	public $id = 'plugin_slurper';
 
 	private $path;
+	private $only_with_textdomain = true;
 
 
 	public function __construct() {
@@ -73,6 +74,9 @@ class Plugin_Slurper extends GP_Plugin {
 			$plugin_data = $this->get_plugin_data( "$plugin_root/$plugin_file" );
 
 			if ( empty ( $plugin_data['Name'] ) )
+				continue;
+
+			if( $this->only_with_textdomain && empty ( $plugin_data['TextDomain'] ) )
 				continue;
 
 			$wp_plugins[ $this->plugin_basename( $plugin_file ) ] = $plugin_data;
