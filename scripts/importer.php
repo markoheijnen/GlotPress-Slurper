@@ -21,9 +21,9 @@ class Plugin_Slurper_Import extends GP_CLI {
 			return;
 		}
 
-		$projects = GP::$plugins->plugin_slurper->get_plugins();
+		$plugins = GP::$plugins->plugin_slurper->get_plugins();
 
-		foreach( $projects as $project_file => $project_data ) {
+		foreach( $plugins as $plugin_file => $plugin_data ) {
 			$project = GP::$project->by_path( 'plugins/' . $plugin_data['Slug'] );
 
 			if( ! $project ) {
