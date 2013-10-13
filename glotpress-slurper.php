@@ -3,7 +3,7 @@
 class Plugin_Slurper extends GP_Plugin {
 	public $id = 'plugin_slurper';
 
-	private $path;
+	public $path;
 	private $only_with_textdomain = true;
 
 
