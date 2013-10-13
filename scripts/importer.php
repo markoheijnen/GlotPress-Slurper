@@ -47,7 +47,7 @@ class Plugin_Slurper_Import extends GP_CLI {
 				$project = GP::$project->create_and_select( $new_project );
 			}
 
-			$result = $this->_import_single_project( $project );
+			$result = $this->_import_single_project( $project, $plugin_file, $plugin_data );
 
 			if( $result ) {
 				list( $originals_added, $originals_existing ) = $result;
@@ -86,33 +86,22 @@ class Plugin_Slurper_Import extends GP_CLI {
 
 
 
-	private function _import_single_project( $project ) {
+	private function _import_single_project( $project, $main_file, $plugin_data ) {
 		$result = false;
 
-		/*
-		$repo         = GP::$plugins->gp_updater->get_project_repo( $project->id );
-		$project_path = $this->path . $project->id;
+		$project_path = GP::$plugins->plugin_slurper->path . '/' . $plugin_data['Slug'];
 
-		// Check if cloning was successful
-		if( $result ) {
-			$file = GP::$plugins->gp_updater->get_option_with_object_id( $project->id, 'main_file' );
-			$type = GP::$plugins->gp_updater->get_option_with_object_id( $project->id, 'type' );
+		// Get tranlsations
+		$translations = $this->extractor->extract_from_directory( $project_path );
 
-			// Get tranlsations
-			$translations = $this->extractor->extract_from_directory( $project_path );
+		// Get project meta
+		$meta = $this->get_project_meta( $project_path, 'plugin', GP::$plugins->plugin_slurper->path . '/' . $main_file );
 
-			// Get project meta
-			$meta = $this->get_project_meta( $project_path, $type, $file );
+		// Merge meta with translations
+		$translations->merge_originals_with( $meta );
 
-			// Merge meta with translations
-			$translations->merge_originals_with( $meta );
-
-			// Insert new translations 
-			return GP::$original->import_for_project( $project, $translations );	
-		}
-		*/
-
-		return false;
+		// Insert new translations 
+		return GP::$original->import_for_project( $project, $translations );
 	}
 
 	private function get_project_meta( $path, $type = 'plugin', $file = false ) {
