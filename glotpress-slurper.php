@@ -79,6 +79,7 @@ class Plugin_Slurper extends GP_Plugin {
 			if( $this->only_with_textdomain && empty ( $plugin_data['TextDomain'] ) )
 				continue;
 
+			$plugin_data['Slug'] = dirname( $plugin_file );
 			$wp_plugins[ $this->plugin_basename( $plugin_file ) ] = $plugin_data;
 		}
 
