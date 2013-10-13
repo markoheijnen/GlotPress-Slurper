@@ -16,7 +16,8 @@ class Plugin_Slurper_Import extends GP_CLI {
 
 
 	private function import_all_projects() {
-		if( ! $this->create_plugin_main_project() ) {
+		$plugin_project_id = $this->create_plugin_main_project();
+		if( ! $plugin_project_id ) {
 			echo __( "Plugins couldn't be imported" ) . "\n";
 			return;
 		}
@@ -32,7 +33,7 @@ class Plugin_Slurper_Import extends GP_CLI {
 					'slug'                => $plugin_data['Slug'],
 					'description'         => $plugin_data['Description'],
 					'source_url_template' => 'plugins.trac.wordpress.org/browser/' . $plugin_data['Slug'] . '/%file%#L%line%',
-					'parent_project_id'   => 0,
+					'parent_project_id'   => $plugin_project_id,
 					'active'              => true
 				);
 
@@ -40,7 +41,6 @@ class Plugin_Slurper_Import extends GP_CLI {
 
 				if ( ! $new_project->validate() ) {
 					echo sprintf( __( "%s couldn't get created" ), $plugin_data['Name'] . " \t" ) . "\n";
-
 					continue;
 				}
 
