@@ -206,5 +206,5 @@ class Plugin_Slurper_Import extends GP_CLI {
 
 }
 
-$gp_updater_script_import = new GP_Updater_Script_Import;
-$gp_updater_script_import->run();
+$gp_plugin_slurper_import = new Plugin_Slurper_Import;
+$gp_plugin_slurper_import->run();
