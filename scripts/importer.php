@@ -38,8 +38,11 @@ class Plugin_Slurper_Import extends GP_CLI {
 
 				$new_project = new GP_Project( $post );
 
-				if ( $this->invalid_and_redirect( $new_project ) )
+				if ( ! $new_project->validate() ) {
+					echo sprintf( __( "%s couldn't get created" ), $plugin_data['Name'] . " \t" ) . "\n";
+
 					continue;
+				}
 
 				$project = GP::$project->create_and_select( $new_project );
 			}
@@ -72,7 +75,7 @@ class Plugin_Slurper_Import extends GP_CLI {
 
 			$new_project = new GP_Project( $post );
 
-			if ( $this->invalid_and_redirect( $new_project ) )
+			if ( ! $new_project->validate() )
 				return false;
 
 			$project = GP::$project->create_and_select( $new_project );
