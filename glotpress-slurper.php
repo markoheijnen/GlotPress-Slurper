@@ -10,7 +10,7 @@ class Plugin_Slurper extends GP_Plugin {
 	public function __construct() {
 		parent::__construct();
 
-		$this->path = dirname( __FILE__ );
+		$this->path = dirname( dirname( dirname( __FILE__ ) ) ) . '/slurper/plugins';
 	}
 
 	/**
@@ -33,15 +33,15 @@ class Plugin_Slurper extends GP_Plugin {
 	public function get_plugins() {
 		$wp_plugins   = array();
 		$plugin_files = array();
-		$plugins_dir  = @ opendir( $plugin_root);
+		$plugins_dir  = @ opendir( $this->path );
 
 		if ( $plugins_dir ) {
 			while ( ( $file = readdir( $plugins_dir ) ) !== false ) {
 				if ( substr( $file, 0, 1 ) == '.' )
 					continue;
 
-				if ( is_dir( $plugin_root . '/' . $file ) ) {
-					$plugins_subdir = @ opendir( $plugin_root . '/' . $file );
+				if ( is_dir( $this->path . '/' . $file ) ) {
+					$plugins_subdir = @ opendir( $this->path . '/' . $file );
 
 					if ( $plugins_subdir ) {
 						while ( ( $subfile = readdir( $plugins_subdir ) ) !== false ) {
@@ -68,10 +68,10 @@ class Plugin_Slurper extends GP_Plugin {
 			return $wp_plugins;
 
 		foreach ( $plugin_files as $plugin_file ) {
-			if ( ! is_readable( "$plugin_root/$plugin_file" ) )
+			if ( ! is_readable( "$this->path/$plugin_file" ) )
 				continue;
 
-			$plugin_data = $this->get_plugin_data( "$plugin_root/$plugin_file" );
+			$plugin_data = $this->get_plugin_data( "$this->path/$plugin_file" );
 
 			if ( empty ( $plugin_data['Name'] ) )
 				continue;
