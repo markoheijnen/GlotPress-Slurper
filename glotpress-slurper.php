@@ -10,7 +10,7 @@ class Plugin_Slurper extends GP_Plugin {
 	public function __construct() {
 		parent::__construct();
 
-		$this->path = dirname( dirname( dirname( __FILE__ ) ) ) . '/slurper/plugins';
+		$this->path = dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/slurper/plugins';
 	}
 
 	/**
