@@ -31,59 +31,72 @@ class Plugin_Slurper extends GP_Plugin {
 	 * @return array Key is the plugin file path and the value is an array of the plugin data.
 	 */
 	public function get_plugins() {
-		$wp_plugins   = array();
-		$plugin_files = array();
-		$plugins_dir  = @ opendir( $this->path );
+		if ( false === ( $wp_plugins = wp_cache_get( 'plugins', $this->id ) ) ) {
 
-		if ( $plugins_dir ) {
-			while ( ( $file = readdir( $plugins_dir ) ) !== false ) {
-				if ( substr( $file, 0, 1 ) == '.' )
-					continue;
+			$wp_plugins   = array();
+			$plugin_files = array();
+			$plugins_dir  = @ opendir( $this->path );
 
-				if ( is_dir( $this->path . '/' . $file ) ) {
-					$plugins_subdir = @ opendir( $this->path . '/' . $file );
+			if ( $plugins_dir ) {
+				while ( ( $file = readdir( $plugins_dir ) ) !== false ) {
+					if ( substr( $file, 0, 1 ) == '.' ) {
+						continue;
+					}
 
-					if ( $plugins_subdir ) {
-						while ( ( $subfile = readdir( $plugins_subdir ) ) !== false ) {
-							if ( substr( $subfile, 0, 1 ) == '.' )
-								continue;
+					if ( is_dir( $this->path . '/' . $file ) ) {
+						$plugins_subdir = @ opendir( $this->path . '/' . $file );
 
-							if ( substr( $subfile, -4 ) == '.php' )
-								$plugin_files[] = "$file/$subfile";
+						if ( $plugins_subdir ) {
+							while ( ( $subfile = readdir( $plugins_subdir ) ) !== false ) {
+								if ( substr( $subfile, 0, 1 ) == '.' ) {
+									continue;
+								}
+
+								if ( substr( $subfile, -4 ) == '.php' ) {
+									$plugin_files[] = "$file/$subfile";
+								}
+							}
+
+							closedir( $plugins_subdir );
 						}
-
-						closedir( $plugins_subdir );
+					}
+					else {
+						if ( substr( $file, -4 ) == '.php' ) {
+							$plugin_files[] = $file;
+						}
 					}
 				}
-				else {
-					if ( substr( $file, -4 ) == '.php' )
-						$plugin_files[] = $file;
-				}
+
+				closedir( $plugins_dir );
 			}
 
-			closedir( $plugins_dir );
+			if ( empty( $plugin_files ) ) {
+				return $wp_plugins;
+			}
+
+			foreach ( $plugin_files as $plugin_file ) {
+				if ( ! is_readable( "$this->path/$plugin_file" ) ) {
+					continue;
+				}
+
+				$plugin_data = $this->get_plugin_data( "$this->path/$plugin_file" );
+
+				if ( empty ( $plugin_data['Name'] ) ) {
+					continue;
+				}
+
+				if ( $this->only_with_textdomain && empty ( $plugin_data['TextDomain'] ) ) {
+					continue;
+				}
+
+				$plugin_data['Slug'] = dirname( $plugin_file );
+				$wp_plugins[ $this->plugin_basename( $plugin_file ) ] = $plugin_data;
+			}
+
+			uasort( $wp_plugins, array( $this, 'sort_uname_callback' ) );
+
+			wp_cache_set( 'plugins', $wp_plugins, $this->id, 3600 * 24 ); // Cache it for 24 hours
 		}
-
-		if ( empty( $plugin_files ) )
-			return $wp_plugins;
-
-		foreach ( $plugin_files as $plugin_file ) {
-			if ( ! is_readable( "$this->path/$plugin_file" ) )
-				continue;
-
-			$plugin_data = $this->get_plugin_data( "$this->path/$plugin_file" );
-
-			if ( empty ( $plugin_data['Name'] ) )
-				continue;
-
-			if( $this->only_with_textdomain && empty ( $plugin_data['TextDomain'] ) )
-				continue;
-
-			$plugin_data['Slug'] = dirname( $plugin_file );
-			$wp_plugins[ $this->plugin_basename( $plugin_file ) ] = $plugin_data;
-		}
-
-		uasort( $wp_plugins, array( $this, 'sort_uname_callback' ) );
 
 		return $wp_plugins;
 	}
@@ -179,8 +192,9 @@ class Plugin_Slurper extends GP_Plugin {
 		$plugin_data = $this->get_file_data( $plugin_file, $default_headers, 'plugin' );
 
 		// Site Wide Only is the old header for Network
-		if ( ! $plugin_data['Network'] && $plugin_data['_sitewide'] )
+		if ( ! $plugin_data['Network'] && $plugin_data['_sitewide'] ) {
 			$plugin_data['Network'] = $plugin_data['_sitewide'];
+		}
 
 		$plugin_data['Network'] = ( 'true' == strtolower( $plugin_data['Network'] ) );
 		unset( $plugin_data['_sitewide'] );
@@ -224,10 +238,12 @@ class Plugin_Slurper extends GP_Plugin {
 		$all_headers = $default_headers;
 
 		foreach ( $all_headers as $field => $regex ) {
-			if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( $regex, '/' ) . ':(.*)$/mi', $file_data, $match ) && $match[1] )
+			if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( $regex, '/' ) . ':(.*)$/mi', $file_data, $match ) && $match[1] ) {
 				$all_headers[ $field ] = trim( preg_replace( "/\s*(?:\*\/|\?>).*/", '', $match[1] ) );
-			else
+			}
+			else {
 				$all_headers[ $field ] = '';
+			}
 		}
 
 		return $all_headers;
